@@ -8,7 +8,7 @@ fig, ax = plt.subplots()
 xdata, ydata = [0], [0]
 ln, = ax.plot([], [], 'ro', markersize=10)
 x_start = -1
-g = 1
+g = 9.81
 
 
 def init():
@@ -28,7 +28,7 @@ def f_prime(x):
 
 
 def theta(x):
-    return (np.arctan(f_prime(x) - f_prime(x) * x / f(x) + f(x)))#  + np.pi/4 * (np.sign(x) + 1)) * (np.sign(x + 1) + 1) * (np.sign(x - .8) - 1) / 4
+    return np.arctan(f_prime(x) - f_prime(x) * x / f(x) + f(x))# + np.pi/8 * (np.sign(x) + 1)
 
 
 def update(frame):
@@ -38,25 +38,26 @@ def update(frame):
     return ln,
 
 
-def frames(start, stop, num) -> np.ndarray:
+def frames(start) -> np.ndarray:
     return_frames = np.array([start])
     acceleration = np.array([0.])
     speed = np.array([0.])
     pos = np.array([start])
     delta_t = .01
-    mu = 5
+    mu = .5
     i = 0
     while True:
         x = pos[0]
-        acceleration = g * np.cos(theta(x)) * (np.cos(theta(x)) - mu * np.sin(theta(x)))
+        acceleration[0] = g * np.cos(theta(x)) * (np.cos(theta(x)) - mu * np.sin(theta(x))) * np.sign(-x)
         speed += acceleration * delta_t
         pos += speed * delta_t
         return_frames = np.append(return_frames, x)
-        i+=1
-        if i%10_000 == 0:
+        i += 1
+        if i % 10000 == 0:
             print(acceleration)
             print(theta(x))
-        if (np.all(abs(acceleration) == 0) and i > 1_000) or i > num:
+            print(x)
+        if (np.all(abs(acceleration) <= .1) and i > 1_000) or i > 100_000:
             print(speed)
             print(return_frames)
             print(i)
@@ -65,6 +66,6 @@ def frames(start, stop, num) -> np.ndarray:
 
 
 plt.plot(val, f(val))
-ani = FuncAnimation(fig, update, frames=frames(-.7, 1, 100_000),
-                    init_func=init, blit=True, interval=25/3, repeat_delay=1000)
+ani = FuncAnimation(fig, update, frames=frames(-.2),
+                    init_func=init, blit=True, interval=25 / 3, repeat_delay=1000)
 plt.show()
