@@ -43,7 +43,7 @@ def frames(start) -> np.ndarray:
     speed = np.array([0., 0.])
     pos = np.array([start, f(start)])
     delta_t = .01
-    mu = .7
+    mu = .5
     i = 0
     m = 1
     while True:
