@@ -28,8 +28,8 @@ def f_prime(x):
 
 
 def theta(x):
-    return np.arctan(f_prime(x) - f_prime(x) * x / f(x) + f(x))# + np.pi/8 * (np.sign(x) + 1)
-
+    #return -np.arctan(f_prime(x) - f_prime(x) * x / f(x) + f(x)) + np.pi / 4 * (np.sign(x) + 1)
+    return -np.arctan(f_prime(x))
 
 def update(frame):
     xdata[0] = frame
@@ -40,22 +40,25 @@ def update(frame):
 
 def frames(start) -> np.ndarray:
     return_frames = np.array([start])
-    acceleration = np.array([0.])
-    speed = np.array([0.])
-    pos = np.array([start])
+    speed = np.array([0., 0.])
+    pos = np.array([start, f(start)])
     delta_t = .01
-    mu = .5
+    mu = .7
     i = 0
+    m = 1
     while True:
         x = pos[0]
-        acceleration[0] = g * np.cos(theta(x)) * (np.cos(theta(x)) - mu * np.sin(theta(x))) * np.sign(-x)
+        R = m * g * np.cos(theta(x)) * np.array([np.sin(theta(x)), np.cos(theta(x))])
+        friction = -mu * m * g * np.array([np.sin(theta(x)), -np.sin(theta(x))])
+        P = m * g * np.array([0, 1])
+        acceleration = (R + friction + P) / m
         speed += acceleration * delta_t
         pos += speed * delta_t
         return_frames = np.append(return_frames, x)
         i += 1
         if i % 10000 == 0:
             print(acceleration)
-            print(theta(x))
+            print(180 * theta(x) / np.pi)
             print(x)
         if (np.all(abs(acceleration) <= .1) and i > 1_000) or i > 100_000:
             print(speed)
@@ -66,6 +69,6 @@ def frames(start) -> np.ndarray:
 
 
 plt.plot(val, f(val))
-ani = FuncAnimation(fig, update, frames=frames(-.2),
+ani = FuncAnimation(fig, update, frames=frames(-.8),
                     init_func=init, blit=True, interval=25 / 3, repeat_delay=1000)
 plt.show()
